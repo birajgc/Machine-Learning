@@ -1,0 +1,108 @@
+---
+title: "Project 1 Machine Learning"
+author: "Biraj GC"
+date: "1/22/2020"
+output: html_document
+---
+```{r}
+#import the librariea.
+library(MASS)
+library(ISLR) 
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+#access of boston for the clarification of data.
+?Boston
+```
+#1 Read the dataset in Boston.csv. Preview the document into R. Call the loaded data Boston. Make sure that you have the directory set to the correct location for the data.
+```{r}
+#read the dataset #Boston.csv into Boston.
+Boston <- read.csv("Boston.csv") 
+#Preview the data set in Rstudio.
+Boston[]
+```
+#2 How many rows are in the data frame? How many columns? What do the rows and columns represent?
+```{r}
+#Find the dimension of the data file
+dim(Boston)
+```
+#2 Answer = Data set has 506 rows and 14 columns. The rows represent the number of data provided i.e no of sub urbs while the columns represents the types of data or the predictors.
+
+#3 Select the 1st, 100th, and 500th rows with columns tax and medv.
+```{r}
+#Print the 1st, 100th and 500th data.
+Boston[c(1,100,500), ]
+```
+
+#4 Look at the data using cor function. Are any of the predictors associated with per capita crime rate? If so, explain the relationship based on correlation coefficents.
+```{r}
+#Find the correlation cofficient of all the predictors.
+cor(Boston)
+```
+#4 Answer = For Predictors to have significant relationship with per capita crime rate accordng to correlation cofficents, it must be greater or close to 0.5 for positive effect and less or close to -0.5 for the negative effect. Considering that and the result of the cor() function above we can see that for per capita crim rate indus , nox, rad, tax and lstat has greater or close to 0.5 correlation cofficient which shows that the these predictors cause positive effect on the crim rate. And since there are no predictors with corr cof. less or close to -0.5, none of the predictors have significant relationship to cause negative crime rate.
+
+
+
+#5 Make some pairwise scatterplots of the predictors, crim, rad, tax, indus, and lstat in this data set. Describe your findings.
+```{r}
+#plot a pairwise scatterplot using pridictors crim, rad, tax,indus,and lstat.
+pairs(~ crim + tax + indus + rad + lstat, data = Boston, panel = panel.smooth)
+```
+#5 Answer = the sctter plot between crime, tax, rad and lstat suggests the relationship with each other. The scatter plot suggests that all of the given predictors have a positive effect on one another. This can be verified by the correlation cofficient found above since all the coorelation coffiecient are positive.
+
+#6 Do any of the suburbs of Boston appear to have particularly high crime rates by looking at the histogram of crim? What is the range of crim by using range() function in R?
+```{r}
+#plot a histogram representing the crime rate.
+hist(main = "Histogram of Percapita crime rate by town", xlab="Per capita crime rate by town",Boston$crim[Boston$crim > 1],breaks = 25, col = 2 )
+#find number of the crime rate above 20
+dim(subset(Boston, crim > 20))
+#find the range of the crime rate
+range(Boston$crim)
+```
+#6 Answer = Considering that crime rate above 20 is high crime rate, from the histogram we can see that there are 18 suburb with crime rate higher than 20. The range function states that the range of the crim rate is from 0.00632 to 88.97620.
+
+
+#7 How many of the suburbs in this dataset bound the Charles River?
+```{r}
+#Loop through the list to find the number of suburbs bound by the charles river
+j <- 0
+for (i in Boston$chas) {
+  if(i==1)
+    j = j+1
+  }
+j
+```
+#7 Answer = There are 35 suburbs in the data set that bound the charles river.
+
+#8 What is the median pupil-teach ratio among the towns in this dataset? What’s the mean?
+```{r}
+#use function median and mean to fine median and mean
+median(Boston$ptratio)
+mean(Boston$ptratio)
+```
+#8 Answer = The median pupil-teacher ratio is 19.05 and the mean is 18.45553
+
+#9 In this dataset, how many of the suburbs average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the suburbs that average more than eight rooms per dwelling.
+```{r}
+#find the number of rm averaging more than 7 and 8 
+dim(subset(Boston, rm > 7))
+dim(subset(Boston, rm > 8))
+#summarize the findings for more than 8 rm.
+summary(subset(Boston, rm > 8))
+```
+#9 Answer = The suburbs with more than 7 rooms are 64 and above 8 are 13. The suburbs with average rooms per dwelling greater than 8 generally has low average crime rate and more expensive.
+
+#10 Convert chas to a factor. Boxplot the medv against chas. Are houses around the Charles River more expensive?
+
+```{r}
+#convert chas into factor.
+Boston$chas <- as.factor(Boston$chas)
+
+#boxplot of medv and chas
+ggplot(data = Boston, aes(x = Boston$chas, y = Boston$medv)) +
+  geom_boxplot()
+```
+#10 Answer = The Box plot suggest that the houses around the charles river are generally more expensive altough some outliers suggests that some houses not in that region are equally expensive. The q1, q2 and q3 are much higher in houses around the charles river suggesting that it is generally more expensive.  
+
+ 
+
