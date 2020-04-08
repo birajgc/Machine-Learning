@@ -1,0 +1,99 @@
+---
+title: "Project 4"
+author: "Biraj GC"
+date: "3/5/2020"
+output: html_document
+---
+```{r}
+#data clear
+rm(list = ls())
+```
+
+You are a data scientist in Jedi Analytics (JA). JA is a public company traded in the Stock exchange. The CEO of JA wants to invest in the real estate properties in the Boston area. You are given a dataset containing housing values in the suburbs of Boston in the file Boston.csv (download this from canvas).
+
+You are asked to perform the following tasks by writing a script in Rmd. 
+
+```{r}
+#read in all the Library
+library(caret)
+library(MASS)
+library(boot)
+library(gam)
+```
+
+
+1.Read the dataset in Boston.csv into R. Call the loaded data Boston. Make sure that you have the directory set to the correct location for the data.
+```{r}
+#load in the data
+boston <-  read.csv("Boston.csv")
+```
+
+```{r}
+#data preview using head
+head(boston)
+```
+```{r}
+#data preview using summary
+summary(boston)
+```
+```{r}
+#data preview using Str.
+str(boston)
+```
+
+
+2.The response is nox and the predictor is dis. Use the poly() function to fit a cubic polynomial regression to predict nox using dis. Report the regression output.
+```{r}
+#build linear model using poly() function.
+linMod <- glm(nox ~ poly(dis,3), data = boston)
+#summarize the model.
+summary(linMod)
+```
+#The three stars on all of the degrees of 'dis' indicate that the p-value is very low. Hence, All of the degree of dis is an important predictor.
+
+3. Your assistant data scientist, Tom Johnson, is considering predicting nox using dis as a predictor. He proposes models from degree 5, degree 4, and degree 3, and degree 2 polynomial regression. Please perform cross-validation using caret package to select the optimal degree for the polynomial and justify your answer.
+
+```{r}
+#build linear model using poly() function for second third fourth and fifth degree.
+#2 Degree
+Lm2 = glm(nox ~ poly(dis,2), data = boston)
+#3 Degree
+Lm3 = glm(nox ~ poly(dis,3), data = boston)
+#4 Degree
+Lm4 = glm(nox ~ poly(dis,4), data = boston)
+#5 Degree
+Lm5 = glm(nox ~ poly(dis,5), data = boston)
+```
+
+```{r}
+#perform 10-fold cross validation on all of the degrees
+cv.error_10_2 <- cv.glm(boston, Lm2, K = 10)
+cv.error_10_3 <- cv.glm(boston, Lm3, K = 10)
+cv.error_10_4 <- cv.glm(boston, Lm4, K = 10)
+cv.error_10_5 <- cv.glm(boston, Lm5, K = 10)
+
+#extract the error data.
+cv.error_10_2$delta[1]
+cv.error_10_3$delta[1]
+cv.error_10_4$delta[1]
+cv.error_10_5$delta[1]
+```
+#since the third degree has lowest error aamong all, it is the optimal degree for the polynomial.
+
+4.Leonard just took the DSCI 356. You recommend that he perform the following GAM analysis.
+  1.Predict nox using a smoothing spline of degree 3 in dis and a smoothing spline of degree 2 in medv.
+  2.Predict nox using a smoothing spline of degree 2 in dis and a smoothing spline of degree 1 in medv.
+```{r warning = FALSE}
+#build gam model for nox using smoothing splins of 2nd degree for medv and 3rd degree for dis
+gam1 <- gam(nox ~ s(dis,3) + s(medv,2), data = boston)
+#build gam model for nox using smoothing splins of 2nd degree for medv and 3rd degree for dis
+gam2 <- gam(nox ~s(dis,2) + medv, data = boston)
+
+```
+ 3.Perform anova analysis. Recommend the best model and justify your answer.
+```{r}
+#use anova function
+anova(gam1,gam2)
+```
+
+#since the p vaue is really low and has tree star significans on the gam2 we reject the nul hypothesis, making gam2 the best model.
