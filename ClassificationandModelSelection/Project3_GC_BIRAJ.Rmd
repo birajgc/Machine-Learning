@@ -1,0 +1,203 @@
+---
+title: "Project 3"
+author: "Biraj GC"
+date: "2/18/2020"
+output: html_document
+---
+```{r}
+#load the library into memory
+library(caret)
+library(MASS)
+library(leaps)
+library (bestglm)
+library(ISLR)
+```
+
+
+PART I.
+You are a data scientist in a top dealership group in USA. Your boss, Mr. Lou, asked you to analyze the motor trend car data. You are given a dataset containing fuel consumption and 10 aspects of automobile design and performance for 32 automobiles the file mtcars.csv.
+
+You are asked to perform the following tasks by writing a script in rmd. 
+
+#1. Load the dataset mtcars.csv. Preview the document into memory and convert column am to a factor using factor() function.
+
+```{r}
+#load the data
+mtcars <- read.csv("mtcars.csv")
+#preview mtcars.
+head(mtcars)
+```
+```{r}
+#convert am into factor.
+mtcars$am <- as.factor(mtcars$am)
+str(mtcars$am)
+```
+
+#2. Split the data into training set and test set. The training set contains the first 35 observations, the test set containing the remaining observations.
+```{r}
+#split the data into training set.
+mtcars.train <- mtcars[1:35,]
+#split the data into test set. 
+mtcars.test <- mtcars[-(1:35),] 
+```
+
+
+#3. Build a logistic regression model with the response is am and the predictors are mpg, cyl, hp, and wt using glm() function
+```{r}
+#logistic regression model using glm() function.
+mod_mtcars <- glm(am~mpg+cyl+hp+wt,data = mtcars.train, family = binomial)
+```
+#4. Compute the test error on the test data set using a confusion matrix. Is it a good model based on test error?
+```{r}
+#use pedict function to test mtcars.test uing mod_pred
+mtcars_pred <- predict(mod_mtcars,newdata = mtcars.test, type = "response")
+#preview the prediction probabilities 
+mtcars_pred
+```
+```{r}
+#Set glm.prob as 0 for all test rows
+glm.prob <- rep("0",nrow(mtcars.test))
+#if prediction > 0.5 set as 1
+glm.prob[mtcars_pred > 0.5] = "1"
+#print glm.prob to visualize the data
+glm.prob
+```
+```{r}
+#visualize the data inform of table using confusion matrix.
+table(glm.prob, mtcars.test$am)
+```
+5 out of 6 predictions were made correct.
+
+```{r}
+#test error = 1-(correct prediction - total)
+test_error <- 1-((5)/(5+1+0+0))# 1-(5/6)
+test_error
+```
+#ans: Based on the error, this is a good model, However since the test data set was very small the result is still inconclusive. 
+
+Part II.
+You are working as a data scientist for the city of Washington D.C. government. Currently, Washington D.C. has a bike sharing system. People can rent a bike from one location and return it to a different place. You are given a historical usage pattern with weather data contained in Excel workbook bike.csv. You are asked to forecast bike rental demand in the capital bike share program.
+
+This data section contains the following data fields:
+
+datetime - hourly date + timestamp
+
+season - 1 = spring, 2 = summer, 3 = fall, 4 = winter
+
+holiday - whether the day is considered a holiday workingday - whether the day is neither a weekend nor holiday
+
+weather - 1: Clear, Few clouds, Partly cloudy, Partly cloudy 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
+
+temp - temperature in Celsius
+
+atemp - "feels like" temperature in Celsius
+
+humidity - relative humidity
+
+windspeed - wind speed
+
+casual - number of non-registered user rentals initiated
+
+registered - number of registered user rentals initiated
+
+count - number of total rentals
+
+```{r}
+#clear memory
+rm (list = ls())
+```
+
+#1. Build a linear model to forecast number of total rentals (count) using potential predictors, season, holiday, workingday, weather, atemp, and registered.
+
+```{r}
+Bike <- read.csv("Bike.csv")
+head(Bike)
+```
+
+```{r}
+#load the model using lm()
+Mod_Rental <- lm(count~season+holiday+workingday+weather+atemp+registered, data = Bike)
+#summarize the model.
+summary(Mod_Rental)
+```
+
+
+#2. Perform best subset selection using bestglm() function based on BIC. What’s the best model based on BIC?
+```{r}
+#The target variable is at the last column
+Xy <-  Bike[, c("season", "holiday", "workingday", "weather", "atemp", "registered","count")]
+
+#Convert it into a data.frame
+Xy <- data.frame(Xy)
+
+```
+
+```{r}
+#perform best subset selection based on BIC
+lm.best <-  bestglm(Xy, IC = "BIC")
+
+#print out the best model
+lm.best
+```
+# Answer: According to Best subset selection and BIC, The Best model is count ~ season + holiday + workingday + weather + atemp + registered
+
+#3. Compute the test error of the best model based on BIC using LOOCV.
+```{r}
+# define training control by specifying LOOCV
+train_control <- trainControl(method="LOOCV")
+
+```
+```{r}
+# train the model
+model <- train(count~season+holiday+workingday+weather+atemp+registered, data=Bike, trControl=train_control, method="lm")
+
+# summarize results
+summary(model)
+
+```
+#Answer: The Residual standard error is 35.26 on 10879 degrees of freedom, and Adjusted R-squared is 0.9621
+
+#4. Calculate the test error of the best model based on BIC using 10-fold CV.
+```{r}
+# define training control by specifying LOOCV
+train_control_2 <- trainControl(method="CV", number=10)
+
+```
+
+
+```{r}
+# train the model
+model_2 <- train(count~season+holiday+workingday+weather+atemp+registered, data=Bike, trControl=train_control_2, method="lm")
+
+# summarize results
+summary(model_2)
+```
+#Answer: The Residual standard error is 35.26 on 10879 degrees of freedom, and Adjusted R-squared is 0.9621
+
+#5. Perform best subset selection using bestglm() function based on CV. What’s the best model based on CV?
+```{r}
+#perform best subset seletion based on cross validation
+lm.cv = bestglm(Xy, IC = "CV")
+
+#print out the best model
+lm.cv
+```
+# Answer: According to Best subset selection on CV, The Best model is count ~ season + holiday + workingday + weather + atemp + registered
+
+#6. Perform the backward stepwise selection using stepAIC() function. What’s the best model?
+```{r}
+#run a linear model uing lm() function with no predictors 
+null <- lm(count ~ 1, data = Bike)
+#run a linear model uing lm() function with all predictors 
+full <- lm(count ~ season+holiday+workingday+weather+atemp+registered, data = Bike)
+```
+```{r}
+#run stepwise backward selection calling function stepAIC
+lm.bwd <-  stepAIC(full, direction = "backward",
+                   scope = list(lower = null, upper = full))
+
+#print the best model
+lm.bwd
+```
+# Answer: According to AIC & stepwise selection, The Best model is count ~ season + holiday + workingday + weather + atemp + registered
+

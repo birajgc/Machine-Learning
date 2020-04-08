@@ -1,0 +1,76 @@
+---
+title: "Project2_GC_Biraj"
+author: "Biraj GC"
+date: "2/9/2020"
+output: html_document
+---
+```{r}
+#reads in mtcars.csv into mtcars.
+mtcars <- read.csv("mtcars.csv")
+#check the data.
+head(mtcars)
+summary(mtcars)
+```
+#1) Use the lm() function to perform a simple linear regression with the response mpg and the predictor hp.
+
+```{r}
+#Use linear model function on data file for y/outcome as mpg and x/prdictor as hp  
+lm_mod1 <- lm(mpg~hp,data=mtcars)
+#summarize the model
+summary(lm_mod1)
+```
+#2) Is there a relationship between the target mpg and predator hp?
+
+#Answer = Yes, The relationship between mpg and hp is defined by the equation,  mpg = 29.297928 -(0.064548*hp) ie. For every unit increase in hp, mpg reduces by 0.064548.
+
+
+#3)How strong is the relationship between the response and predictor?
+
+#Answer = The three stars besides p-value suggests that the its very low, so the the relationship between response and predictor is very strong.
+
+
+#4)Is the relationship between mpg and hp positive or negative?
+
+#Answer = Negative relationship. This is because the slope in the model is negative, i.e downwards.
+
+
+#5 What is the predicted mpg associated with a horsepower (hp) of 100? What’s the 95% confidence interval for the predicted mpg?
+
+#answer = 29.297928-(-0.064548*100)=22.843128
+```{r}
+#use confint function to find 95% confidence interval. 
+confint(lm_mod1,level=.95)
+```
+#For 95% confident interval the upper interval is mpg = 31.95 - 0.047 hp, mpg = 26.63 - 0.081 hp for the lower interval. 
+
+#6 Plot the response and the predictor and add the regression line using abline().
+```{r}
+#plot for hp and mpg
+plot(mtcars$hp,mtcars$mpg)+
+#add abline using linear model
+abline(lm_mod1, lwd=1, col = "red")
+```
+
+#7 Perform a multiple linear regression with mpg as the response and the predictors cyl, disp, hp, wt, vs, and gear. Print out the results using summary() function.
+
+```{r}
+#Use linear model function on data file for y/outcome as mpg and x/predictor as cyl,disp,hp,wt,vs,gear  
+lm_mod2 <- lm(mpg~cyl+disp+hp+wt+vs+gear,data=mtcars)
+#summarize the model.
+summary(lm_mod2)
+```
+#8 Is there a relationship between the predictors and the response?
+#Answer = Yes, the relationship is defined by the equation 33.29705 -0.74909*cyl + 0.01733*disp -0.03352*hp -3.85230*wt + 0.70816*vs + 1.14054*gear.
+
+#9 Which predictors appears to have a statistically significant relationship to the response?
+
+#Answer = hp and wt seem to have a significant relationship, The three stars in WT shows that it has more stronger significance than hp.
+
+#10 Use * symbols to fit linear regression models with interaction effects between hp and wt. Does this interaction appear to be statistically significant?
+
+```{r}
+#Use linear model function on data file for y/outcome as mpg and x/predictor as hp and wt)  
+lm_mod3 <- lm(mpg~hp*wt,data=mtcars)
+summary(lm_mod3)
+```
+#Answer = It is significant since the relationship between hp and wt has three stars i.e the p value is very low..
